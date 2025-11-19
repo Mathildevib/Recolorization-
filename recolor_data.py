@@ -1,33 +1,29 @@
-#Recolorization dataset handling. 
-
+import os
+from PIL import Image
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
-from PIL import Image
-import os
+
 class RecolorDataset(Dataset):
     def __init__(self, grey_dir, color_dir):
-        self.grey_dir = grey_dir
-        self.color_dir = color_dir
+        self.grey_paths  = sorted(os.listdir(grey_dir))
+        self.grey_dir    = grey_dir
+        self.color_dir   = color_dir
 
-        # Find joint filenames
-        self.filenames = sorted(os.listdir(grey_dir))
-
-        self.to_tensor = T.ToTensor()
+        self.transform = T.Compose([
+            T.Resize((256,256)),
+            T.ToTensor(),
+            T.Normalize([0.5]*3, [0.5]*3)
+        ])
 
     def __len__(self):
-        return len(self.filenames)
+        return len(self.grey_paths)
 
     def __getitem__(self, idx):
-        name = self.filenames[idx]
+        name = self.grey_paths[idx]
 
-        grey_path = os.path.join(self.grey_dir, name)
-        color_path = os.path.join(self.color_dir, name)
+        grey  = Image.open(os.path.join(self.grey_dir, name)).convert("RGB")
+        color = Image.open(os.path.join(self.color_dir, name)).convert("RGB")
 
-        grey = Image.open(grey_path).convert("L")
-        color = Image.open(color_path).convert("RGB")
+        return self.transform(grey), self.transform(color)
 
-        grey = self.to_tensor(grey)
-        color = self.to_tensor(color)
-
-        return grey, color
