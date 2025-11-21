@@ -164,7 +164,7 @@ patience_cnt = 0
 train_losses, val_losses = [], []
 
 for epoch in range(1, NUM_EPOCHS + 1):
-    # --- Train ---
+    # Train
     model.train()
     running_loss = 0.0
     for L_input, L_true, target, weight in tqdm(train_loader, desc=f"Epoch {epoch} [Train]"):
@@ -183,7 +183,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
 
         running_loss += loss.item()
 
-    # --- Validation ---
+    # Validation
     model.eval()
     val_loss = 0.0
     with torch.no_grad():
@@ -208,7 +208,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
     else:
         patience_cnt += 1
         if patience_cnt >= PATIENCE:
-            print("Early stopping triggered")
+            print("Early stopping")
             break
 
 # Plot
